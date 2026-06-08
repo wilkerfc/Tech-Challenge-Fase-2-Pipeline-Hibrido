@@ -1,0 +1,25 @@
+# Pipeline de Alfabetização Brasil – Dependências
+
+# GCP SDK
+google-cloud-bigquery==3.25.0
+google-cloud-storage==2.18.2
+google-cloud-pubsub==2.23.1
+google-cloud-monitoring==2.22.0
+google-cloud-logging==3.11.1
+
+# Data processing
+pandas==2.2.2
+pyarrow==17.0.0
+numpy==1.26.4
+
+# Infrastructure
+google-auth==2.35.0
+
+# Qualidade / Testes
+pytest==8.3.3
+pytest-mock==3.14.0
+great-expectations==0.18.19
+
+# Utils
+python-dotenv==1.0.1
+tenacity==9.0.0

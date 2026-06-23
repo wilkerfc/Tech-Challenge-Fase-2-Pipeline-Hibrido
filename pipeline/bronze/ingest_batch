@@ -1,0 +1,149 @@
+"""
+Bronze Layer - Batch Ingestion Pipeline
+Ingestão de dados brutos das fontes educacionais (Base dos Dados / BigQuery)
+"""
+
+import logging
+import os
+from datetime import datetime
+from pathlib import Path
+
+import pandas as pd
+from google.cloud import bigquery, storage
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
+)
+logger = logging.getLogger("bronze.batch")
+
+# ---------------------------------------------------------------------------
+# Configurações
+# ---------------------------------------------------------------------------
+PROJECT_ID = os.getenv("GCP_PROJECT_ID", "tc-alfabetizacao")
+BUCKET_NAME = os.getenv("GCS_BUCKET", "tc-alfabetizacao-datalake")
+BQ_DATASET_BASE = "basedosdados"
+RUN_DATE = datetime.utcnow().strftime("%Y-%m-%d")
+
+QUERIES = {
+    "indicador_alfabetizacao": f"""
+        SELECT *
+        FROM `basedosdados.br_inep_crianca_alfabetizada.municipio`
+    """,
+    "meta_brasil": f"""
+        SELECT *
+        FROM `basedosdados.br_inep_crianca_alfabetizada.brasil`
+    """,
+    "meta_uf": f"""
+        SELECT *
+        FROM `basedosdados.br_inep_crianca_alfabetizada.uf`
+    """,
+    "meta_municipio": f"""
+        SELECT *
+        FROM `basedosdados.br_inep_crianca_alfabetizada.municipio_meta`
+    """,
+    "municipios": f"""
+        SELECT id_municipio, nome, sigla_uf, id_uf
+        FROM `basedosdados.br_bd_diretorios_brasil.municipio`
+    """,
+    "ufs": f"""
+        SELECT id_uf, sigla, nome
+        FROM `basedosdados.br_bd_diretorios_brasil.uf`
+    """,
+}
+
+
+# ---------------------------------------------------------------------------
+# Funções auxiliares
+# ---------------------------------------------------------------------------
+
+def get_bq_client() -> bigquery.Client:
+    return bigquery.Client(project=PROJECT_ID)
+
+
+def get_gcs_client() -> storage.Client:
+    return storage.Client(project=PROJECT_ID)
+
+
+def query_to_dataframe(client: bigquery.Client, query: str) -> pd.DataFrame:
+    """Executa query no BigQuery e retorna DataFrame."""
+    logger.info("Executando query BigQuery...")
+    job = client.query(query)
+    df = job.to_dataframe()
+    logger.info(f"Registros retornados: {len(df)}")
+    return df
+
+
+def save_to_gcs_parquet(
+    df: pd.DataFrame,
+    bucket: storage.Bucket,
+    entity: str,
+) -> str:
+    """Salva DataFrame como Parquet particionado na camada Bronze do GCS."""
+    blob_path = f"bronze/{entity}/ingestion_date={RUN_DATE}/{entity}.parquet"
+    blob = bucket.blob(blob_path)
+
+    local_path = Path(f"/tmp/{entity}.parquet")
+    df.to_parquet(local_path, index=False, engine="pyarrow")
+
+    blob.upload_from_filename(str(local_path))
+    gcs_uri = f"gs://{bucket.name}/{blob_path}"
+    logger.info(f"Salvo em: {gcs_uri}")
+    return gcs_uri
+
+
+def log_metadata(entity: str, row_count: int, gcs_uri: str):
+    """Registra metadados de ingestão no arquivo de log local."""
+    log_entry = {
+        "entity": entity,
+        "ingestion_date": RUN_DATE,
+        "row_count": row_count,
+        "gcs_uri": gcs_uri,
+        "status": "SUCCESS",
+    }
+    logger.info(f"Metadata: {log_entry}")
+    return log_entry
+
+
+# ---------------------------------------------------------------------------
+# Pipeline principal
+# ---------------------------------------------------------------------------
+
+def run_batch_ingestion():
+    logger.info("=== Iniciando Bronze Batch Ingestion ===")
+
+    bq_client = get_bq_client()
+    gcs_client = get_gcs_client()
+    bucket = gcs_client.bucket(BUCKET_NAME)
+
+    results = []
+    errors = []
+
+    for entity, query in QUERIES.items():
+        try:
+            logger.info(f"--- Processando entidade: {entity} ---")
+            df = query_to_dataframe(bq_client, query)
+
+            # Adiciona metadados de controle
+            df["_ingestion_timestamp"] = datetime.utcnow().isoformat()
+            df["_source"] = "basedosdados"
+            df["_batch_date"] = RUN_DATE
+
+            gcs_uri = save_to_gcs_parquet(df, bucket, entity)
+            meta = log_metadata(entity, len(df), gcs_uri)
+            results.append(meta)
+
+        except Exception as exc:
+            logger.error(f"Erro ao processar {entity}: {exc}")
+            errors.append({"entity": entity, "error": str(exc)})
+
+    # Resumo
+    logger.info(f"=== Ingestão concluída: {len(results)} sucesso(s), {len(errors)} erro(s) ===")
+    if errors:
+        logger.warning(f"Entidades com erro: {[e['entity'] for e in errors]}")
+
+    return results, errors
+
+
+if __name__ == "__main__":
+    run_batch_ingestion()

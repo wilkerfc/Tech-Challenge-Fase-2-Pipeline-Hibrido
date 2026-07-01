@@ -1,0 +1,223 @@
+<svg viewBox="0 0 860 780" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', Arial, sans-serif">
+
+  <!-- Background -->
+  <rect width="860" height="780" fill="#0f1117"/>
+
+  <!-- ============================
+       TITLE
+  ============================= -->
+  <text x="430" y="38" text-anchor="middle" font-size="18" font-weight="700" fill="#ffffff">Pipeline Híbrida – Alfabetização Brasil</text>
+  <text x="430" y="58" text-anchor="middle" font-size="12" fill="#8b8fa8">Arquitetura Medalhão · GCP · Batch + Streaming</text>
+
+  <!-- ============================
+       SOURCES ROW
+  ============================= -->
+  <text x="430" y="88" text-anchor="middle" font-size="11" fill="#6b7280">FONTES DE DADOS</text>
+
+  <!-- Base dos Dados -->
+  <rect x="30" y="96" width="155" height="52" rx="8" fill="#1a2035" stroke="#3b82f6" stroke-width="1.2"/>
+  <text x="107" y="118" text-anchor="middle" font-size="12" font-weight="600" fill="#93c5fd">Base dos Dados</text>
+  <text x="107" y="136" text-anchor="middle" font-size="10" fill="#6b7280">BigQuery / API</text>
+
+  <!-- Censo Escolar -->
+  <rect x="205" y="96" width="155" height="52" rx="8" fill="#1a2035" stroke="#3b82f6" stroke-width="1.2"/>
+  <text x="282" y="118" text-anchor="middle" font-size="12" font-weight="600" fill="#93c5fd">Censo Escolar</text>
+  <text x="282" y="136" text-anchor="middle" font-size="10" fill="#6b7280">INEP / IBGE</text>
+
+  <!-- Eventos SAEB -->
+  <rect x="380" y="96" width="155" height="52" rx="8" fill="#1a2035" stroke="#8b5cf6" stroke-width="1.2" stroke-dasharray="5,3"/>
+  <text x="457" y="118" text-anchor="middle" font-size="12" font-weight="600" fill="#c4b5fd">Eventos SAEB</text>
+  <text x="457" y="136" text-anchor="middle" font-size="10" fill="#6b7280">Pub/Sub · streaming</text>
+
+  <!-- Scheduler -->
+  <rect x="555" y="96" width="140" height="52" rx="8" fill="#1a2035" stroke="#6b7280" stroke-width="1.2"/>
+  <text x="625" y="118" text-anchor="middle" font-size="12" font-weight="600" fill="#d1d5db">Cloud Scheduler</text>
+  <text x="625" y="136" text-anchor="middle" font-size="10" fill="#6b7280">02h / 04h / 06h / 07h</text>
+
+  <!-- ============================
+       INGESTION ROW
+  ============================= -->
+  <!-- Arrows sources → ingestion -->
+  <line x1="107" y1="148" x2="170" y2="196" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr-blue)"/>
+  <line x1="282" y1="148" x2="220" y2="196" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr-blue)"/>
+  <line x1="457" y1="148" x2="457" y2="196" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-purple)"/>
+  <line x1="625" y1="148" x2="380" y2="196" stroke="#6b7280" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr-gray)"/>
+
+  <text x="430" y="188" text-anchor="middle" font-size="11" fill="#6b7280">INGESTÃO</text>
+
+  <!-- Batch Ingestion -->
+  <rect x="30" y="196" width="220" height="52" rx="8" fill="#1e2d40" stroke="#3b82f6" stroke-width="1.2"/>
+  <text x="140" y="218" text-anchor="middle" font-size="12" font-weight="600" fill="#93c5fd">Batch Ingestion</text>
+  <text x="140" y="235" text-anchor="middle" font-size="10" fill="#6b7280">ingest_batch.py · Cloud Function</text>
+
+  <!-- Streaming Consumer -->
+  <rect x="370" y="196" width="230" height="52" rx="8" fill="#221e40" stroke="#8b5cf6" stroke-width="1.2" stroke-dasharray="5,3"/>
+  <text x="485" y="218" text-anchor="middle" font-size="12" font-weight="600" fill="#c4b5fd">Streaming Consumer</text>
+  <text x="485" y="235" text-anchor="middle" font-size="10" fill="#6b7280">Cloud Function · Pub/Sub trigger</text>
+
+  <!-- ============================
+       BRONZE LAYER
+  ============================= -->
+  <line x1="140" y1="248" x2="200" y2="294" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr-gray)"/>
+  <line x1="485" y1="248" x2="380" y2="294" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-purple)"/>
+
+  <!-- Bronze box -->
+  <rect x="30" y="294" width="620" height="108" rx="12" fill="#2a1f0e" stroke="#b45309" stroke-width="1.5"/>
+  <text x="55" y="318" font-size="13" font-weight="700" fill="#fbbf24">🟫  Bronze Layer</text>
+  <text x="470" y="318" font-size="10" fill="#92400e">GCS · Parquet · partition: ingestion_date=</text>
+
+  <!-- Bronze cards -->
+  <rect x="48" y="326" width="106" height="60" rx="6" fill="#3b2510" stroke="#b45309" stroke-width="1"/>
+  <text x="101" y="352" text-anchor="middle" font-size="11" font-weight="600" fill="#fcd34d">Indicador</text>
+  <text x="101" y="368" text-anchor="middle" font-size="9" fill="#92400e">Alfabetização</text>
+
+  <rect x="166" y="326" width="106" height="60" rx="6" fill="#3b2510" stroke="#b45309" stroke-width="1"/>
+  <text x="219" y="352" text-anchor="middle" font-size="11" font-weight="600" fill="#fcd34d">Municípios</text>
+  <text x="219" y="368" text-anchor="middle" font-size="9" fill="#92400e">Diretório</text>
+
+  <rect x="284" y="326" width="90" height="60" rx="6" fill="#3b2510" stroke="#b45309" stroke-width="1"/>
+  <text x="329" y="352" text-anchor="middle" font-size="11" font-weight="600" fill="#fcd34d">Metas</text>
+  <text x="329" y="368" text-anchor="middle" font-size="9" fill="#92400e">BR / UF / Mun.</text>
+
+  <rect x="386" y="326" width="100" height="60" rx="6" fill="#3b2510" stroke="#b45309" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="436" y="352" text-anchor="middle" font-size="11" font-weight="600" fill="#fcd34d">Streaming</text>
+  <text x="436" y="368" text-anchor="middle" font-size="9" fill="#92400e">Eventos · JSON</text>
+
+  <rect x="498" y="326" width="136" height="60" rx="6" fill="#3b2510" stroke="#b45309" stroke-width="1"/>
+  <text x="566" y="352" text-anchor="middle" font-size="11" font-weight="600" fill="#fcd34d">UFs</text>
+  <text x="566" y="368" text-anchor="middle" font-size="9" fill="#92400e">Territórios</text>
+
+  <!-- ============================
+       SILVER LAYER
+  ============================= -->
+  <line x1="340" y1="402" x2="340" y2="442" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr-gray)"/>
+  <text x="360" y="428" font-size="10" fill="#6b7280">transform.py</text>
+
+  <rect x="30" y="442" width="620" height="112" rx="12" fill="#1a2535" stroke="#475569" stroke-width="1.5"/>
+  <text x="55" y="466" font-size="13" font-weight="700" fill="#94a3b8">⚙️  Silver Layer</text>
+  <text x="455" y="466" font-size="10" fill="#475569">GCS · Parquet · partition: processed_date=</text>
+
+  <!-- Silver cards -->
+  <rect x="48" y="474" width="106" height="60" rx="6" fill="#1e2d3d" stroke="#475569" stroke-width="1"/>
+  <text x="101" y="498" text-anchor="middle" font-size="11" font-weight="600" fill="#cbd5e1">Limpeza</text>
+  <text x="101" y="514" text-anchor="middle" font-size="9" fill="#475569">duplicatas · nulos</text>
+
+  <rect x="166" y="474" width="106" height="60" rx="6" fill="#1e2d3d" stroke="#475569" stroke-width="1"/>
+  <text x="219" y="498" text-anchor="middle" font-size="11" font-weight="600" fill="#cbd5e1">Tipos / Norm.</text>
+  <text x="219" y="514" text-anchor="middle" font-size="9" fill="#475569">cast · texto · chaves</text>
+
+  <rect x="284" y="474" width="110" height="60" rx="6" fill="#1e2d3d" stroke="#475569" stroke-width="1"/>
+  <text x="339" y="498" text-anchor="middle" font-size="11" font-weight="600" fill="#cbd5e1">Integridade</text>
+  <text x="339" y="514" text-anchor="middle" font-size="9" fill="#475569">referencial · FK</text>
+
+  <rect x="406" y="474" width="106" height="60" rx="6" fill="#1e2d3d" stroke="#475569" stroke-width="1"/>
+  <text x="459" y="498" text-anchor="middle" font-size="11" font-weight="600" fill="#cbd5e1">Integração</text>
+  <text x="459" y="514" text-anchor="middle" font-size="9" fill="#475569">join das tabelas</text>
+
+  <rect x="524" y="474" width="110" height="60" rx="6" fill="#1e2d3d" stroke="#475569" stroke-width="1"/>
+  <text x="579" y="498" text-anchor="middle" font-size="11" font-weight="600" fill="#cbd5e1">Validação</text>
+  <text x="579" y="514" text-anchor="middle" font-size="9" fill="#475569">data_quality.py</text>
+
+  <!-- ============================
+       GOLD LAYER
+  ============================= -->
+  <line x1="340" y1="554" x2="340" y2="594" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr-gray)"/>
+  <text x="360" y="580" font-size="10" fill="#6b7280">build_analytics.py</text>
+
+  <rect x="30" y="594" width="620" height="112" rx="12" fill="#1f1a35" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="55" y="618" font-size="13" font-weight="700" fill="#a78bfa">⭐  Gold Layer</text>
+  <text x="430" y="618" font-size="10" fill="#5b21b6">GCS · Parquet   +   BigQuery · partitioned · clustered</text>
+
+  <!-- Gold cards -->
+  <rect x="48" y="626" width="140" height="60" rx="6" fill="#2d1f50" stroke="#7c3aed" stroke-width="1"/>
+  <text x="118" y="650" text-anchor="middle" font-size="11" font-weight="600" fill="#ddd6fe">indicador_municipio</text>
+  <text x="118" y="666" text-anchor="middle" font-size="9" fill="#5b21b6">gap vs meta · status</text>
+
+  <rect x="200" y="626" width="130" height="60" rx="6" fill="#2d1f50" stroke="#7c3aed" stroke-width="1"/>
+  <text x="265" y="650" text-anchor="middle" font-size="11" font-weight="600" fill="#ddd6fe">evolucao_uf</text>
+  <text x="265" y="666" text-anchor="middle" font-size="9" fill="#5b21b6">YoY · % metas</text>
+
+  <rect x="342" y="626" width="130" height="60" rx="6" fill="#2d1f50" stroke="#7c3aed" stroke-width="1"/>
+  <text x="407" y="650" text-anchor="middle" font-size="11" font-weight="600" fill="#ddd6fe">painel_nacional</text>
+  <text x="407" y="666" text-anchor="middle" font-size="9" fill="#5b21b6">consolidado · 2030</text>
+
+  <rect x="484" y="626" width="140" height="60" rx="6" fill="#2d1f50" stroke="#7c3aed" stroke-width="1"/>
+  <text x="554" y="650" text-anchor="middle" font-size="11" font-weight="600" fill="#ddd6fe">ml_features</text>
+  <text x="554" y="666" text-anchor="middle" font-size="9" fill="#5b21b6">lag · tendência · target</text>
+
+  <!-- ============================
+       OUTPUTS ROW
+  ============================= -->
+  <line x1="150" y1="706" x2="120" y2="740" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#arr-purple)"/>
+  <line x1="340" y1="706" x2="340" y2="740" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#arr-purple)"/>
+  <line x1="530" y1="706" x2="560" y2="740" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#arr-purple)"/>
+
+  <!-- BigQuery / BI -->
+  <rect x="30" y="740" width="180" height="30" rx="6" fill="#172554" stroke="#3b82f6" stroke-width="1"/>
+  <text x="120" y="760" text-anchor="middle" font-size="11" font-weight="600" fill="#93c5fd">BigQuery · Dashboards</text>
+
+  <!-- ML -->
+  <rect x="240" y="740" width="200" height="30" rx="6" fill="#1a1035" stroke="#7c3aed" stroke-width="1"/>
+  <text x="340" y="760" text-anchor="middle" font-size="11" font-weight="600" fill="#c4b5fd">Modelos de ML / IA</text>
+
+  <!-- Monitoring -->
+  <rect x="460" y="740" width="190" height="30" rx="6" fill="#1a2010" stroke="#16a34a" stroke-width="1"/>
+  <text x="555" y="760" text-anchor="middle" font-size="11" font-weight="600" fill="#86efac">Cloud Monitoring · Alertas</text>
+
+  <!-- ============================
+       MONITORING SIDE PANEL
+  ============================= -->
+  <rect x="670" y="196" width="160" height="460" rx="10" fill="#111827" stroke="#1f2937" stroke-width="1"/>
+  <text x="750" y="220" text-anchor="middle" font-size="11" font-weight="700" fill="#6b7280">OBSERVABILIDADE</text>
+
+  <rect x="682" y="232" width="136" height="54" rx="6" fill="#1a2010" stroke="#166534" stroke-width="1"/>
+  <text x="750" y="252" text-anchor="middle" font-size="10" font-weight="600" fill="#86efac">Health Checks</text>
+  <text x="750" y="267" text-anchor="middle" font-size="9" fill="#4b5563">GCS · BigQuery · Pub/Sub</text>
+  <text x="750" y="279" text-anchor="middle" font-size="9" fill="#4b5563">pré/pós execução</text>
+
+  <rect x="682" y="298" width="136" height="54" rx="6" fill="#1a2010" stroke="#166534" stroke-width="1"/>
+  <text x="750" y="318" text-anchor="middle" font-size="10" font-weight="600" fill="#86efac">Métricas Custom</text>
+  <text x="750" y="333" text-anchor="middle" font-size="9" fill="#4b5563">ingestion_rows</text>
+  <text x="750" y="345" text-anchor="middle" font-size="9" fill="#4b5563">quality_pass_rate</text>
+
+  <rect x="682" y="364" width="136" height="54" rx="6" fill="#1a2010" stroke="#166534" stroke-width="1"/>
+  <text x="750" y="384" text-anchor="middle" font-size="10" font-weight="600" fill="#86efac">Alertas</text>
+  <text x="750" y="399" text-anchor="middle" font-size="9" fill="#4b5563">erros &gt; 5 / 5min</text>
+  <text x="750" y="411" text-anchor="middle" font-size="9" fill="#4b5563">quality &lt; 80%</text>
+
+  <rect x="682" y="430" width="136" height="54" rx="6" fill="#1a2010" stroke="#166534" stroke-width="1"/>
+  <text x="750" y="450" text-anchor="middle" font-size="10" font-weight="600" fill="#86efac">Run Logger</text>
+  <text x="750" y="465" text-anchor="middle" font-size="9" fill="#4b5563">audit trail GCS</text>
+  <text x="750" y="477" text-anchor="middle" font-size="9" fill="#4b5563">run_logs/*.json</text>
+
+  <rect x="682" y="496" width="136" height="54" rx="6" fill="#172030" stroke="#1e3a5f" stroke-width="1"/>
+  <text x="750" y="516" text-anchor="middle" font-size="10" font-weight="600" fill="#93c5fd">FinOps</text>
+  <text x="750" y="531" text-anchor="middle" font-size="9" fill="#4b5563">Parquet · lifecycle</text>
+  <text x="750" y="543" text-anchor="middle" font-size="9" fill="#4b5563">partition · cluster</text>
+
+  <rect x="682" y="562" width="136" height="54" rx="6" fill="#172030" stroke="#1e3a5f" stroke-width="1"/>
+  <text x="750" y="582" text-anchor="middle" font-size="10" font-weight="600" fill="#93c5fd">CI/CD</text>
+  <text x="750" y="597" text-anchor="middle" font-size="9" fill="#4b5563">GitHub Actions</text>
+  <text x="750" y="609" text-anchor="middle" font-size="9" fill="#4b5563">lint · test · deploy</text>
+
+  <!-- Side panel dashed line to layers -->
+  <line x1="670" y1="350" x2="650" y2="350" stroke="#1f2937" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="670" y1="498" x2="650" y2="498" stroke="#1f2937" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="670" y1="648" x2="650" y2="648" stroke="#1f2937" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <!-- ============================
+       ARROW MARKERS
+  ============================= -->
+  <defs>
+    <marker id="arr-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arr-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#8b5cf6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arr-gray" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+</svg>

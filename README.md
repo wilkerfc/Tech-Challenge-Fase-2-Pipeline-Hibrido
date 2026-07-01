@@ -59,9 +59,57 @@ Fontes de Dados
 
 ---
 
-## Diagrama do Pipeline
+## Descrição da Arquitetura da Solução
 
-Veja o arquivo `docs/architecture_diagram.svg` ou a imagem abaixo para o diagrama completo de fluxo de dados.
+A solução foi projetada como uma **pipeline híbrida de dados em nuvem (GCP)**, combinando ingestão batch e streaming sobre uma arquitetura Medalhão com três camadas de armazenamento no Google Cloud Storage (GCS) e uma camada analítica no BigQuery.
+
+### Ingestão (entrada de dados)
+
+A pipeline opera com dois modos de ingestão simultâneos:
+
+**Batch** — disparado diariamente pelo Cloud Scheduler, o módulo `ingest_batch.py` consulta seis entidades da plataforma Base dos Dados via BigQuery público e persiste os resultados como arquivos Parquet particionados por data no GCS. Esse modo cobre todos os dados históricos: indicadores de alfabetização, metas nacionais, estaduais e municipais, além dos diretórios de UFs e municípios.
+
+**Streaming** — eventos de atualização de indicadores são publicados em um tópico no Cloud Pub/Sub e processados por uma Cloud Function (`pubsub_trigger`). Cada evento é validado, enriquecido com metadados de processamento e persistido individualmente no GCS. Uma fila de mensagens mortas (DLQ) captura eventos inválidos para reprocessamento manual.
+
+### Bronze Layer — Raw Data
+
+Camada de aterrissagem dos dados brutos. Nenhuma transformação significativa é aplicada — os dados são armazenados exatamente como vieram da fonte, acrescidos de metadados de controle (`_ingestion_timestamp`, `_source`, `_batch_date`). O particionamento por `ingestion_date=` permite reprocessamento cirúrgico sem reescrever todo o dataset. Dados de streaming chegam nessa camada como arquivos JSON newline-delimited em prefixo separado (`bronze/streaming/`).
+
+### Silver Layer — Dados Tratados e Integrados
+
+Camada de refinamento, operada pelo módulo `transform.py`. As seguintes transformações são aplicadas em sequência:
+
+- **Remoção de duplicatas** por chave primária de cada entidade
+- **Tratamento de nulos** com regras específicas por coluna
+- **Normalização de texto** — remoção de acentos, uppercase, strip de espaços
+- **Cast de tipos** — datas como `int`, indicadores como `float`, IDs como `str`
+- **Validação de integridade referencial** — municípios verificados contra UFs, indicadores verificados contra municípios
+- **Integração das bases** — as seis entidades são relacionadas e enriquecidas mutuamente
+
+A Silver é o ponto de verdade dos dados — tudo que chega à Gold parte daqui.
+
+### Gold Layer — Camada Analítica
+
+Camada de consumo, construída pelo módulo `build_analytics.py`. Produz quatro datasets prontos para uso:
+
+- **`indicador_municipio`** — visão enriquecida por município com gap vs meta, status de atingimento e dados territoriais. Carregada também no BigQuery com particionamento por data e clustering por `sigla_uf` e `ano`.
+- **`evolucao_uf`** — agregação por estado com variação ano a ano (YoY), percentual de municípios que atingiram a meta e totais de matrículas.
+- **`painel_nacional`** — consolidado Brasil com progresso em direção à meta 2030, indicador médio nacional e gap vs meta.
+- **`ml_features`** — feature store para modelos de machine learning, com variáveis de lag, tendência e o indicador como target binário (`meta_atingida`).
+
+### Orquestração e Monitoramento
+
+O `orchestrator.py` coordena a execução sequencial das camadas com health checks pré e pós execução, captura de erros por estágio e geração de audit trail completo em JSON no GCS. O módulo `monitoring.py` publica métricas customizadas no Cloud Monitoring e dispara alertas por e-mail em caso de falhas ou degradação de qualidade de dados.
+
+### Infraestrutura como Código
+
+Toda a infraestrutura GCP — buckets com lifecycle rules, dataset BigQuery com schema, tópicos Pub/Sub com DLQ, Cloud Scheduler jobs e políticas de alerta — é provisionada via Terraform (`infra/terraform/main.tf`), garantindo reprodutibilidade total entre ambientes.
+
+---
+
+## Diagrama da Arquitetura
+
+![Arquitetura da Pipeline](docs/architecture_diagram.svg)
 
 ---
 
@@ -117,6 +165,7 @@ Evento publicado no tópico 'alfabetizacao-events'
 | **Terraform** | IaC | Reprodutibilidade, versionamento da infra |
 | **Python / Pandas** | Transformações | Ecossistema rico, familiar à equipe |
 | **PyArrow / Parquet** | Serialização | Compressão eficiente, leitura colunar rápida |
+| **GitHub Actions** | CI/CD | Lint, testes e deploy automatizados a cada PR/push |
 
 ---
 
@@ -223,6 +272,9 @@ A camada Gold (`ml_features`) foi projetada como **feature store** para modelos 
 
 ```
 tc-fase2/
+├── .github/
+│   └── workflows/
+│       └── ci.yml                   # Pipeline de CI/CD (lint, testes, deploy)
 ├── pipeline/
 │   ├── bronze/
 │   │   └── ingest_batch.py          # Ingestão batch do Base dos Dados
@@ -293,6 +345,19 @@ python streaming/streaming_pipeline.py simulate
 ```bash
 pytest tests/ -v
 ```
+
+---
+
+## CI/CD
+
+O workflow `.github/workflows/ci.yml` executa automaticamente:
+
+1. **Lint** — `ruff` e `black` em todo push/PR
+2. **Testes** — `pytest` com cobertura mínima de 70%
+3. **Terraform Validate** — validação da infraestrutura em PRs para `main`
+4. **Deploy** — publica as Cloud Functions no GCP via Workload Identity Federation (somente push em `main`)
+
+Secrets necessários no GitHub: `GCP_PROJECT_ID`, `GCS_BUCKET`, `GCP_WORKLOAD_IDENTITY_PROVIDER`, `GCP_SERVICE_ACCOUNT`.
 
 ---
 

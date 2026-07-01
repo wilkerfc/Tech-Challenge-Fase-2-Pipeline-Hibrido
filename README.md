@@ -107,7 +107,7 @@ Toda a infraestrutura GCP — buckets com lifecycle rules, dataset BigQuery com 
 
 ---
 
-## Diagrama da Arquitetura
+## Diagrama do Pipeline
 
 ![Arquitetura da Pipeline](docs/architecture_diagram.svg)
 
